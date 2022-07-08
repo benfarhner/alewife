@@ -1,0 +1,19 @@
+{
+  "name": "alewife",
+  "version": "0.1.0",
+  "description": "Alewife",
+  "main": "server/index.js",
+  "engines": {
+    "node": "16.x"
+  },
+  "dependencies": {
+    "@koa/cors": "^3.3.0",
+    "dotenv": "^16.0.1",
+    "koa": "^2.13.4",
+    "koa-route": "^3.2.0",
+    "node-fetch": "^2.6.7"
+  },
+  "scripts": {
+    "start": "node server/index.js"
+  }
+}
