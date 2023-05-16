@@ -8,9 +8,9 @@ import Batches from './components/batches';
 
 function App() {
   return (
-    <Box p={2}>
+    <div className="app-root">
       <Batches />
-    </Box>
+    </div>
   );
 }
 

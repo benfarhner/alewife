@@ -2,7 +2,7 @@
  * @fileoverview Implements a class for handling API calls.
  */
 
-const API_ROOT = 'http://localhost:5000/api';
+const API_ROOT = 'http://localhost:5001/api';
 const BATCHES_RESOURCE = 'batches';
 
 export default class Api {

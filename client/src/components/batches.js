@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
@@ -20,9 +21,9 @@ export default function Batches() {
 
     api.getBatches()
       .then(newBatches => {
-        setDrinking(newBatches.filter(batch => batch.status === 'Completed'));
-        setBrewing(newBatches.filter(batch => batch.status === 'Fermenting' || batch.status === 'Conditioning'));
-        setUpcoming(newBatches.filter(batch => batch.status === 'Planning'));
+        setDrinking(newBatches.filter(batch => batch.status === 'drinking'));
+        setBrewing(newBatches.filter(batch => batch.status === 'brewing'));
+        setUpcoming(newBatches.filter(batch => batch.status === 'upcoming'));
       });
   };
 
@@ -31,37 +32,49 @@ export default function Batches() {
   }, []);
 
   return (
-    <>
-      <Typography variant="h2">
-        Drinking
-      </Typography>
-      <Grid container spacing={2}>
-        {drinking.map(batch =>
-          <Grid item key={batch._id} xs={12} sm={4} md={3} lg={2}>
-            <Batch batch={batch} />
+    <Box p={2}>
+      {drinking.length > 0 &&
+        <>
+          <Typography variant="h3">
+            Drinking
+          </Typography>
+          <Grid container spacing={2} py={2}>
+            {drinking.map(batch =>
+              <Grid item key={batch.sourceId} xs={12} sm={4} md={3} lg={2}>
+                <Batch batch={batch} />
+              </Grid>
+            )}
           </Grid>
-        )}
-      </Grid>
-      <Typography variant="h2">
-        Brewing
-      </Typography>
-      <Grid container spacing={2}>
-        {brewing.map(batch =>
-          <Grid item key={batch._id} xs={12} sm={4} md={3} lg={2}>
-            <Batch batch={batch} />
+        </>
+      }
+      {brewing.length > 0 &&
+        <>
+          <Typography variant="h3">
+            Brewing
+          </Typography>
+          <Grid container spacing={2} py={2}>
+            {brewing.map(batch =>
+              <Grid item key={batch.sourceId} xs={12} sm={4} md={3} lg={2}>
+                <Batch batch={batch} />
+              </Grid>
+            )}
           </Grid>
-        )}
-      </Grid>
-      <Typography variant="h2">
-        Upcoming
-      </Typography>
-      <Grid container spacing={2}>
-        {upcoming.map(batch =>
-          <Grid item key={batch._id} xs={12} sm={4} md={3} lg={2}>
-            <Batch batch={batch} />
+        </>
+      }
+      {upcoming.length > 0 &&
+        <>
+          <Typography variant="h3">
+            Upcoming
+          </Typography>
+          <Grid container spacing={2} py={2}>
+            {upcoming.map(batch =>
+              <Grid item key={batch.sourceId} xs={12} sm={4} md={3} lg={2}>
+                <Batch batch={batch} />
+              </Grid>
+            )}
           </Grid>
-        )}
-      </Grid>
-    </>
+        </>
+      }
+    </Box>
   )
 }

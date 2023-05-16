@@ -5,7 +5,9 @@ const Koa = require('koa');
 const _ = require('koa-route');
 const cors = require('@koa/cors');
 
-const Brewfather = require('./integrations/brewfather.js');
+const BatchService = require('./services/batch.js');
+const jobs = require('./jobs/jobs.js');
+const { BatchStatuses } = require('./lib/batch-statuses.js');
 
 const app = new Koa();
 
@@ -13,23 +15,20 @@ const app = new Koa();
 app.use(cors({ origin: '*' }));
 
 app.use(_.get('/api/batches', async (ctx) => {
-  const brewfather = new Brewfather();
-  const planning = await brewfather.getBatches('Planning');
-  const brewing = await brewfather.getBatches('Brewing');
-  const fermenting = await brewfather.getBatches('Fermenting');
-  const conditioning = await brewfather.getBatches('Conditioning');
-  const completed = await brewfather.getBatches('Completed');
-  
-  const batches = [
-    ...planning,
-    ...brewing,
-    ...fermenting,
-    ...conditioning,
-    ...completed
-  ];
+  const batchService = new BatchService.BatchService();
+  const drinking = await batchService.getBatches(BatchStatuses.DRINKING);
+  const brewing = await batchService.getBatches(BatchStatuses.BREWING);
+  const upcoming = await batchService.getBatches(BatchStatuses.UPCOMING);
+
+  const batches = drinking.concat(brewing).concat(upcoming);
 
   ctx.status = 200;
   ctx.body = batches;
 }));
 
-app.listen(5000);
+// Start all jobs
+(async () => {
+  await jobs.start();
+})();
+
+app.listen(5001);

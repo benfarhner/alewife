@@ -2,7 +2,9 @@
  * @fileoverview Implements an integration with the Brewfather API.
  */
 
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+const { BatchStatuses } = require('../lib/batch-statuses');
 
 /**
  * Brewfather API root URL.
@@ -34,35 +36,65 @@ class Brewfather {
    */
   async getBatches(status) {
     const include = [
+      '_id',
+      'batchNo',
+      'bottlingDate',
+      'brewDate',
+      'brewer',
+      'carbonationType',
+      'estimatedBuGuRatio',
+      'estimatedColor',
+      'estimatedFg',
+      'estimatedIbu',
+      'estimatedOg',
+      'estimatedRbRatio',
+      'fermentationStartDate',
       'measuredAbv',
       'measuredFg',
-      'status',
-      'brewDate',
       'measuredOg',
-      'bottlingDate',
-      'recipe.color',
+      'name',
       'recipe.abv',
-      'recipe.name',
-      'recipe.ibu',
+      'recipe.buGuRatio',
+      'recipe.color',
       'recipe.fg',
+      'recipe.fgEstimated',
+      'recipe.ibu',
+      'recipe.name',
+      'recipe.nutrition.calories.kJ',
       'recipe.og',
       'recipe.rbRatio',
       'recipe.style.name',
-      'measuredBatchSize',
-      'fermentationStartDate',
-      'estimatedBuGuRatio',
-      'estimatedColor',
-      'batchNo',
-      'estimatedIbu',
-      'name',
-      '_id',
-      'estimatedRbRatio',
-      'estimatedOg',
+      'recipe.teaser',
+      'status',
     ];
 
-    //"Brewing", "Fermenting", "Conditioning", "Completed"
+    // Normalize status for Brewfather API
+    let brewfatherStatus;
+
+    switch (status) {
+      case BatchStatuses.UPCOMING:
+        brewfatherStatus = BrewfatherStatuses.PLANNING;
+        break;
+      case BatchStatuses.BREWING:
+        brewfatherStatus = [
+          BrewfatherStatuses.BREWING,
+          BrewfatherStatuses.FERMENTING,
+          BrewfatherStatuses.CONDITIONING
+        ].join(',');
+        break;
+      case BatchStatuses.DRINKING:
+        brewfatherStatus = BrewfatherStatuses.COMPLETED;
+        break;
+      case BatchStatuses.ARCHIVED:
+        brewfatherStatus = BrewfatherStatuses.ARCHIVED;
+        break;
+      default:
+        brewfatherStatus = '';
+        break;
+    }
+
     const params = new URLSearchParams();
-    params.append('status', status);
+    params.append('status', brewfatherStatus);
     params.append('include', include.join(','));
 
     const url = this.getUrl(BATCHES_RESOURCE, null, params);
@@ -75,7 +107,81 @@ class Brewfather {
         'Authorization': `Basic ${this.getAuthKey()}`,
       },
     })
-      .then(response => response.json());
+      .then(response => response.json())
+      .then(batches => batches.map(batch => this.getModel(batch)));
+  }
+
+  /**
+   * @function getModel
+   * Gets an Alewife batch model from the given Brewfather batch object.
+   * @param {object} batch - Brewfather batch object
+   * @returns {object} Alewife batch model
+   */
+  getModel(batch) {
+    // Normalize the status
+    let status = 'unknown';
+
+    switch (batch.status) {
+      case BrewfatherStatuses.PLANNING:
+        status = BatchStatuses.UPCOMING;
+        break;
+      case BrewfatherStatuses.BREWING:
+      case BrewfatherStatuses.FERMENTING:
+      case BrewfatherStatuses.CONDITIONING:
+        status = BatchStatuses.BREWING;
+        break;
+      case BrewfatherStatuses.COMPLETED:
+        status = BatchStatuses.DRINKING;
+        break;
+      case BrewfatherStatuses.ARCHIVED:
+        status = BatchStatuses.ARCHIVED;
+        break;
+      default:
+        status = BatchStatuses.UNKNOWN;
+        break;
+    }
+
+    // Normalize package
+    var pkg = null;
+
+    switch (batch.carbonationType) {
+      case BrewfatherCarbonationTypes.SUGAR:
+        pkg = 'bottle';
+        break;
+      case BrewfatherCarbonationTypes.KEG_FORCE:
+      case BrewfatherCarbonationTypes.KEG_SUGAR:
+        pkg = 'keg';
+        break;
+      default:
+        pkg = null;
+        break;
+    }
+
+    // Build a normalized model
+    return {
+      abv: batch.measuredAbv ?? batch.recipe?.abv,
+      brewed: batch.brewDate,
+      brewer: batch.brewer,
+      buGu: batch.estimatedBuGuRatio ?? batch.recipe?.buGuRatio,
+      calories: batch.recipe?.nutrition?.calories?.kJ,
+      fg: batch.measuredFg ?? batch.estimatedFg ?? batch.recipe?.fg
+        ?? batch.recipe?.fgEstimated,
+      ibu: batch.estimatedIbu ?? batch.recipe?.ibu,
+      name: batch.recipe?.name ?? batch.name,
+      number: batch.batchNo,
+      og: batch.measuredOg ?? batch.estimatedOg ?? batch.recipe?.og,
+      package: pkg,
+      packaged: batch.bottlingDate,
+      pitched: batch.fermentationStartDate,
+      rbr: batch.estimatedRbRatio ?? batch.recipe?.rbRatio,
+      source: 'brewfather',
+      sourceId: batch._id,
+      srm: batch.estimatedColor ?? batch.recipe?.color,
+      status,
+      style: batch.recipe?.style?.name,
+      summary: batch.recipe?.teaser,
+      tap: null,
+    };
   }
 
   /**
@@ -111,4 +217,23 @@ class Brewfather {
   }
 }
 
-module.exports = Brewfather;
+const BrewfatherStatuses = Object.freeze({
+  PLANNING: 'Planning',
+  BREWING: 'Brewing',
+  FERMENTING: 'Fermenting',
+  CONDITIONING: 'Conditioning',
+  COMPLETED: 'Completed',
+  ARCHIVED: 'Archived',
+});
+
+const BrewfatherCarbonationTypes = Object.freeze({
+  SUGAR: 'Sugar',
+  KEG_FORCE: 'Keg (Force)',
+  KEG_SUGAR: 'Keg (Sugar)',
+});
+
+module.exports = {
+  BrewfatherCarbonationTypes,
+  BrewfatherStatuses,
+  Brewfather,
+};

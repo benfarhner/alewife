@@ -1,0 +1,22 @@
+.batch-root {
+  background-color: #f1f8e9 !important;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.batch-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: calc(100% - 32px);
+}
+
+.batch-stats {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.grow {
+  flex-grow: 1;
+}
