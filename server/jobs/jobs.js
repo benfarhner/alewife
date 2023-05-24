@@ -11,7 +11,7 @@ const bree = new Bree({
     {
       name: 'update',
       path: path.join(__dirname, 'update.js'),
-      interval: 'every 5 minutes'
+      interval: 'every 12 hours'
     }
   ]
 });

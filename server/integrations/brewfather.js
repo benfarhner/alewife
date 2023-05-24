@@ -107,6 +107,7 @@ class Brewfather {
         'Authorization': `Basic ${this.getAuthKey()}`,
       },
     })
+      .then(response => { console.log(response);  return response; })
       .then(response => response.json())
       .then(batches => batches.map(batch => this.getModel(batch)));
   }

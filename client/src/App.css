@@ -1,3 +1,30 @@
 html {
-  background-color: #c5e1a5;
+  background-color: #5D9A65;
+}
+
+.logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo img {
+  height: 128px;
+  width: auto;
+}
+
+.MuiButtonBase-root.settings, .MuiButtonBase-root.add-tap {
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.2);
+  position: fixed;
+  bottom: 0px;
+}
+
+.settings {
+  left: 0px;
+}
+
+.add-tap {
+  right: 0px;
 }

@@ -1,38 +1,35 @@
 /**
  * @fileoverview Implements a cache.
+ * 
+ * Assumes the following environment variables are available:
+ * - `REDIS_URL`
  */
 
 const { createClient } = require('redis');
 
+/**
+ * Static reference to the client, used across instances of Cache.
+ */
+let _client = null;
+
 class Cache {
   /**
-   * @constructor
-   * Assumes the following environment variables are available:
-   * - `REDIS_TLS_URL`
-   * - `REDIS_URL`
-   */
-  constructor() {
-    // Initialize Redis cache
-    this.client = createClient({ url: process.env.REDIS_URL });
-
-    // Track connected state
-    this.connected = false;
-
-    // Handle Redis errors
-    this.client.on('error', (err) => console.log('[Cache] Redis client error', err));
-    this.client.on('connect', () => console.log('[Cache] Redis client connected'));
-    this.client.on('reconnecting', () => console.log('[Cache] Redis client reconnecting'));
-    this.client.on('ready', () => console.log('[Cache] Redis client ready'));
-  }
-
-  /**
    * @function connect
-   * Ensure client is connected.
+   * Ensure client is connected. Always call this before any further actions.
    */
   async connect() {
-    if (!this.connected) {
-      await this.client.connect();
-      this.connected = true;
+    if (!_client) {
+      // Initialize Redis cache
+      _client = createClient({ url: process.env.REDIS_URL });
+  
+      // Handle Redis errors
+      _client.on('error', (err) => console.log('[Cache] Redis client error', err));
+      _client.on('connect', () => console.log('[Cache] Redis client connected'));
+      _client.on('reconnecting', () => console.log('[Cache] Redis client reconnecting'));
+      _client.on('ready', () => console.log('[Cache] Redis client ready'));
+      
+      // Connect to the Redis cache
+      await _client.connect();
     }
   }
 
@@ -44,7 +41,7 @@ class Cache {
    */
   async set(key, value) {
     await this.connect();
-    await this.client.set(key, value);
+    await _client.set(key, value);
   }
 
   /**
@@ -55,7 +52,7 @@ class Cache {
    */
   async get(key) {
     await this.connect();
-    return await this.client.get(key);
+    return await _client.get(key);
   }
 
   /**
@@ -65,7 +62,7 @@ class Cache {
    */
   async delete(key) {
     await this.connect();
-    await this.client.DEL(key);
+    await _client.DEL(key);
   }
 }
 
