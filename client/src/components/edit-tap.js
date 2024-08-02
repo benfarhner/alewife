@@ -4,14 +4,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { HexColorInput, HexColorPicker } from 'react-colorful';
-
 import {
   Box,
   Button,
   Dialog,
   DialogTitle,
   FormControl,
+  FormLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -24,10 +23,12 @@ import SportsBarIcon from '@mui/icons-material/SportsBar';
 import SportsBarOutlinedIcon from '@mui/icons-material/SportsBarOutlined';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 
+import ColorPicker from './color-picker';
 import getColorFromSrm from '../lib/srm';
 
 export default function EditTap(props) {
   const { batches, index, onClose, onDelete, open, tap } = props;
+  const [abv, setAbv] = useState(0);
   const [batchId, setBatchId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -35,10 +36,11 @@ export default function EditTap(props) {
   const [icon, setIcon] = useState('');
 
   useEffect(() => {
+    setAbv(tap?.abv ?? tap?.batch?.abv ?? 0);
     setBatchId(tap?.batch?.sourceId ?? '');
     setName(tap?.name ?? '');
     setDescription(tap?.description ?? '');
-    setColor(tap?.color ?? '#000');
+    setColor(tap?.color ?? 'var(--text-color)');
     setIcon(tap?.icon ?? 'mug-empty')
   }, [tap]);
 
@@ -48,15 +50,17 @@ export default function EditTap(props) {
       ...tap,
       batch,
       name,
+      abv,
       description,
       color,
       icon
     };
     onClose(newTap);
-  }, [batches, batchId, color, description, icon, name, onClose, tap]);
+  }, [abv, batches, batchId, color, description, icon, name, onClose, tap]);
 
   const handleBatchChange = useCallback(event => {
     const batch = batches.find(batch => batch.sourceId === event.target.value);
+    setAbv(batch?.abv ?? 0);
     setBatchId(event.target.value);
     setName(batch?.name ?? '');
     setDescription(batch?.summary ?? '');
@@ -64,6 +68,7 @@ export default function EditTap(props) {
     setIcon(batch ? 'mug-full' : 'mug-empty');
   }, [batches]);
 
+  const handleAbvChange = event => setAbv(event.target.value);
   const handleNameChange = event => setName(event.target.value);
   const handleDescriptionChange = event => setDescription(event.target.value);
   const handleColorChange = event => setColor(event?.target?.value ?? event);
@@ -97,7 +102,7 @@ export default function EditTap(props) {
               </MenuItem>
               {batches.map(batch =>
                 <MenuItem key={batch.sourceId} value={batch.sourceId}>
-                  {batch.name}
+                  {batch.name} ({batch.status})
                 </MenuItem>
               )}
             </Select>
@@ -109,6 +114,13 @@ export default function EditTap(props) {
             value={name}
           />
           <TextField
+            id="edit-tap-abc"
+            label="ABV"
+            onChange={handleAbvChange}
+            type="number"
+            value={abv}
+          />
+          <TextField
             id="edit-tap-name"
             label="Tap description"
             minRows={3}
@@ -116,28 +128,34 @@ export default function EditTap(props) {
             onChange={handleDescriptionChange}
             value={description}
           />
-          <HexColorPicker color={color} onChange={handleColorChange} />
-          <TextField
-            id="edit-tap-name"
-            label="Custom color"
-            onChange={handleColorChange}
-            value={color}
-          />
-          <ToggleButtonGroup
-            exclusive
-            onChange={handleIconChange}
-            value={icon}
-          >
-            <ToggleButton value="mug-full">
-              <SportsBarIcon fontSize="large" style={{ color }} />
-            </ToggleButton>
-            <ToggleButton value="mug-empty">
-              <SportsBarOutlinedIcon fontSize="large" style={{ color }} />
-            </ToggleButton>
-            <ToggleButton value="water">
-              <WaterDropIcon fontSize="large" style={{ color }} />
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Stack direction="row" spacing={2}>
+            <FormControl>
+              <FormLabel>
+                Icon
+              </FormLabel>
+              <ToggleButtonGroup
+                exclusive
+                onChange={handleIconChange}
+                value={icon}
+              >
+                <ToggleButton value="mug-full">
+                  <SportsBarIcon fontSize="large" style={{ color }} />
+                </ToggleButton>
+                <ToggleButton value="mug-empty">
+                  <SportsBarOutlinedIcon fontSize="large" style={{ color }} />
+                </ToggleButton>
+                <ToggleButton value="water">
+                  <WaterDropIcon fontSize="large" style={{ color }} />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </FormControl>
+            <FormControl>
+              <FormLabel>
+                Color
+              </FormLabel>
+              <ColorPicker color={color} onChange={handleColorChange} />
+            </FormControl>
+          </Stack>
           <Button color="error" onClick={onDelete}>
             Delete tap
           </Button>

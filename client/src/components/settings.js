@@ -16,24 +16,35 @@ import {
 } from '@mui/material';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import ColorPicker from './color-picker';
+
+const DEFAULT_COLORS = {
+  background: '#6750A4',
+  tap: '#EADDFF',
+  text: '#21005E'
+};
 
 export default function Settings(props) {
   const { onClose, open, settings } = props;
-  const [layout, setLayout] = useState('');
+  const [colors, setColors] = useState(DEFAULT_COLORS);
 
   useEffect(() => {
-    setLayout(settings?.layout ?? 'vertical');
+    setColors(settings?.colors ?? DEFAULT_COLORS);
   }, [settings]);
 
   const handleClose = useCallback(() => {
     const newSettings = {
       ...settings,
-      layout
+      colors
     };
     onClose(newSettings);
-  }, [layout, onClose, settings]);
+  }, [colors, onClose, settings]);
 
-  const handleLayoutChange = (_, value) => value !== null && setLayout(value);
+  const handleColorChange = useCallback(property => value => {
+    const newColors = { ...colors };
+    newColors[property] = value;
+    setColors(newColors);
+  }, [colors]);
 
   return (
     <Dialog
@@ -47,23 +58,16 @@ export default function Settings(props) {
       </DialogTitle>
       <Box pb={3} px={3}>
         <Stack spacing={2}>
-          <FormControl fullWidth>
-            <FormLabel>
-              Layout
-            </FormLabel>
-            <ToggleButtonGroup
-              exclusive
-              onChange={handleLayoutChange}
-              value={layout}
-            >
-              <ToggleButton value="vertical">
-                <ViewColumnIcon fontSize="large" />
-              </ToggleButton>
-              <ToggleButton value="horizontal">
-                <TableRowsIcon fontSize="large" />
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </FormControl>
+          <Stack direction="row" spacing={2}>
+            {Object.keys(DEFAULT_COLORS).map(key =>
+              <FormControl key={key}>
+                <FormLabel>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </FormLabel>
+                <ColorPicker color={colors[key]} onChange={handleColorChange(key)} />
+              </FormControl>
+            )}
+          </Stack>
         </Stack>
       </Box>
     </Dialog>

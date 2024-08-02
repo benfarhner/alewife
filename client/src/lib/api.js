@@ -2,7 +2,7 @@
  * @fileoverview Implements a class for handling API calls.
  */
 
-const API_ROOT = 'http://localhost:5001/api';
+const API_ROOT = `${process.env.REACT_APP_API_URL}/api`;
 const BATCHES_RESOURCE = 'batches';
 const TAPS_RESOURCE = 'taps';
 const SETTINGS_RESOURCE = 'settings';
@@ -86,7 +86,8 @@ export default class Api {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Space-App-Key': process.env.REACT_APP_SPACE_API_KEY
       }
     })
       .then(response => response.json());
@@ -108,7 +109,8 @@ export default class Api {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Space-App-Key': process.env.REACT_APP_SPACE_API_KEY
       },
       body: JSON.stringify(payload)
     });

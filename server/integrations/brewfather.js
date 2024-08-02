@@ -9,7 +9,7 @@ const { BatchStatuses } = require('../lib/batch-statuses');
 /**
  * Brewfather API root URL.
  */
-const API_ROOT = 'https://api.brewfather.app/v1';
+const API_ROOT = 'https://api.brewfather.app/v2';
 
 /**
  * API resource for batches.
@@ -69,47 +69,50 @@ class Brewfather {
     ];
 
     // Normalize status for Brewfather API
-    let brewfatherStatus;
+    const brewfatherStatuses = [];
 
     switch (status) {
       case BatchStatuses.UPCOMING:
-        brewfatherStatus = BrewfatherStatuses.PLANNING;
+        brewfatherStatuses.push(BrewfatherStatuses.PLANNING);
         break;
       case BatchStatuses.BREWING:
-        brewfatherStatus = [
-          BrewfatherStatuses.BREWING,
-          BrewfatherStatuses.FERMENTING,
-          BrewfatherStatuses.CONDITIONING
-        ].join(',');
+        brewfatherStatuses.push(BrewfatherStatuses.BREWING);
+        brewfatherStatuses.push(BrewfatherStatuses.FERMENTING);
+        brewfatherStatuses.push(BrewfatherStatuses.CONDITIONING);
         break;
       case BatchStatuses.DRINKING:
-        brewfatherStatus = BrewfatherStatuses.COMPLETED;
+        brewfatherStatuses.push(BrewfatherStatuses.COMPLETED);
         break;
       case BatchStatuses.ARCHIVED:
-        brewfatherStatus = BrewfatherStatuses.ARCHIVED;
-        break;
-      default:
-        brewfatherStatus = '';
+        brewfatherStatuses.push(BrewfatherStatuses.ARCHIVED);
         break;
     }
 
-    const params = new URLSearchParams();
-    params.append('status', brewfatherStatus);
-    params.append('include', include.join(','));
+    let allBatches = []
 
-    const url = this.getUrl(BATCHES_RESOURCE, null, params);
+    for (const brewfatherStatus of brewfatherStatuses) {
+      const params = new URLSearchParams();
+      params.append('status', brewfatherStatus);
+      params.append('include', include.join(','));
+      // params.append('complete', 'true');
 
-    return await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Basic ${this.getAuthKey()}`,
-      },
-    })
-      .then(response => { console.log(response);  return response; })
-      .then(response => response.json())
-      .then(batches => batches.map(batch => this.getModel(batch)));
+      const url = this.getUrl(BATCHES_RESOURCE, null, params);
+      const batches = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Basic ${this.getAuthKey()}`,
+        },
+      })
+        // .then(response => { console.log(response);  return response; })
+        .then(response => response.json())
+        .then(batches => batches.map(batch => this.getModel(batch)));
+
+      allBatches = allBatches.concat(batches);
+    }
+
+    return allBatches;
   }
 
   /**
@@ -119,6 +122,7 @@ class Brewfather {
    * @returns {object} Alewife batch model
    */
   getModel(batch) {
+    console.log(batch)
     // Normalize the status
     let status = 'unknown';
 
@@ -158,6 +162,20 @@ class Brewfather {
         break;
     }
 
+    let batchName = 'Batch'
+
+    // Determine batch name. If it has the default batch name "Batch", then use
+    // the recipe name instead.
+    if (batch.name != null && batch.name.length > 0 &&
+      batch.name.toLowerCase().trim() != 'batch') {
+      batchName = batch.name
+    } else if (batch.recipe?.name != null && batch.recipe.name.length > 0) {
+      batchName = batch.recipe.name
+    } else if (batch.batchNo != null) {
+      // No batch name or recipe name, so use the batch number
+      batchName = `Batch #${batch.batchNo}`
+    }
+
     // Build a normalized model
     return {
       abv: batch.measuredAbv ?? batch.recipe?.abv,
@@ -168,7 +186,7 @@ class Brewfather {
       fg: batch.measuredFg ?? batch.estimatedFg ?? batch.recipe?.fg
         ?? batch.recipe?.fgEstimated,
       ibu: batch.estimatedIbu ?? batch.recipe?.ibu,
-      name: batch.recipe?.name ?? batch.name,
+      name: batchName,
       number: batch.batchNo,
       og: batch.measuredOg ?? batch.estimatedOg ?? batch.recipe?.og,
       package: pkg,
@@ -180,7 +198,7 @@ class Brewfather {
       srm: batch.estimatedColor ?? batch.recipe?.color,
       status,
       style: batch.recipe?.style?.name,
-      summary: batch.recipe?.teaser,
+      summary: batch.recipe?.teaser ?? batch.recipe?.style?.name,
       tap: null,
     };
   }

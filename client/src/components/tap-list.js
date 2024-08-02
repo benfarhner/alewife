@@ -4,22 +4,24 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { IconButton } from '@mui/material';
+import { Box, IconButton, Typography, requirePropFactory } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import Api from '../lib/api';
 import debounce from '../lib/debounce';
 import EditTap from './edit-tap';
-import Tap from './tap';
 import Settings from './settings';
+import Tap from './tap';
 
-export default function TapList() {
+import '../styles/tap-list.css';
+
+export default function TapList(props) {
+  const { setSettings, settings } = props;
   const [batches, setBatches] = useState([]);
   const [taps, setTaps] = useState([]);
   const [editingTap, setEditingTap] = useState(null);
   const [editingTapIndex, setEditingTapIndex] = useState(-1);
-  const [settings, setSettings] = useState(null);
   const [editingSettings, setEditingSettings] = useState(false);
 
   const saveTaps_impl = useMemo(() => debounce(newTaps => {
@@ -40,17 +42,6 @@ export default function TapList() {
     api.getBatches().then(newBatches => setBatches(newBatches));
     api.getTaps().then(newTaps => setTaps(newTaps));
     api.getSettings().then(newSettings => setSettings(newSettings));
-  }, []);
-
-  const handleSettingsClick = useCallback(() => setEditingSettings(true), []);
-
-  const handleSettingsClose = useCallback(newSettings => {
-    const api = new Api();
-
-    api.saveSettings(newSettings).then(() => {
-      setSettings(newSettings);
-      setEditingSettings(false);
-    });
   }, []);
 
   const handleAddTapClick = useCallback(() => {
@@ -91,39 +82,102 @@ export default function TapList() {
     saveTaps(taps);
   }, [saveTaps, taps])
 
+  const handleSettingsClick = useCallback(() => setEditingSettings(true), []);
+  const handleSettingsClose = useCallback(newSettings => {
+    const api = new Api();
+
+    api.saveSettings(newSettings).then(() => {
+      setSettings(newSettings);
+      setEditingSettings(false);
+    });
+  }, []);
+
   return (
-    <div style={{ flexGrow: 1 }}>
-      <div style={{ display: 'flex', flexDirection: settings?.layout === 'horizontal' ? 'column' : 'row', gap: '16px', height: '100%' }}>
-        {taps?.map((tap, index) =>
-          <div
-            key={`tap-${tap.id}`}
-            style={{ flexBasis: (100 / taps.length) + '%', flexGrow: 1 }}
+    <>
+      <Box sx={{
+        display: 'grid',
+        gap: theme => theme.spacing(4),
+        gridTemplateColumns: '1fr',
+        gridTemplateRows: 'min-content 1fr min-content',
+        height: '100%'
+      }}>
+        <Box pt={4} px={4} sx={{
+          alignItems: 'center',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          '& img': {
+            height: '128px',
+            width: 'auto'
+          }
+        }}>
+          <img alt="logo" src="/images/logo.png" />
+        </Box>
+        <Box px={4} sx={{
+          display: 'grid',
+          columnGap: theme => theme.spacing(8),
+          rowGap: theme => theme.spacing(4),
+          gridAutoFlow: 'column',
+          gridAutoColumns: 'minmax(0, 1fr)',
+          gridTemplateRows: 'repeat(auto-fit, minmax(100px, 1fr))'
+        }}>
+          {taps?.map((tap, index) =>
+            <div key={`tap-${tap.id}`}>
+              <Tap
+                index={index}
+                onEdit={handleEditTap(tap, index)}
+                onMove={handleMoveTap}
+                onMoved={handleMovedTap}
+                tap={tap}
+              />
+            </div>
+          )}
+        </Box>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <IconButton
+            onClick={handleSettingsClick}
+            size="small"
+            sx={{
+              backgroundColor: 'transparent',
+              color: 'rgba(0, 0, 0, 0.2)',
+            }}
           >
-            <Tap
-              horizontal={settings?.layout === 'horizontal'}
-              index={index}
-              onEdit={handleEditTap(tap, index)}
-              onMove={handleMoveTap}
-              onMoved={handleMovedTap}
-              tap={tap}
-            />
-          </div>
-        )}
-      </div>
-      <IconButton
-        className="settings"
-        onClick={handleSettingsClick}
-        size="small"
-      >
-        <SettingsIcon />
-      </IconButton>
-      <IconButton
-        className="add-tap"
-        onClick={handleAddTapClick}
-        size="small"
-      >
-        <AddIcon />
-      </IconButton>
+            <SettingsIcon />
+          </IconButton>
+          <Box textAlign="center">
+            <span className="tap-coming-soon-heading">
+              Coming soon:{' '}
+            </span>
+            <span className="tap-coming-soon-batches">
+              {batches
+                .filter(i => i.status == "brewing" || i.status == "upcoming")
+                .map(i => i.name)
+                .join(', ')
+              }
+            </span>
+          </Box>
+          <IconButton
+            onClick={handleAddTapClick}
+            size="small"
+            sx={{
+              backgroundColor: 'transparent',
+              color: 'rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Box>
+      </Box>
+      <Settings
+        onClose={handleSettingsClose}
+        open={editingSettings}
+        settings={settings}
+      />
       <EditTap
         batches={batches}
         onClose={handleEditTapClose}
@@ -132,11 +186,6 @@ export default function TapList() {
         tap={editingTap}
         index={editingTapIndex}
       />
-      <Settings
-        onClose={handleSettingsClose}
-        open={editingSettings}
-        settings={settings}
-      />
-    </div>
+    </>
   )
 }

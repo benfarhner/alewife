@@ -9,9 +9,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useDrag, useDrop } from 'react-dnd';
 
-import { Card, CardContent, Typography } from '@mui/material';
-
-
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import SportsBarIcon from '@mui/icons-material/SportsBar';
 import SportsBarOutlinedIcon from '@mui/icons-material/SportsBarOutlined';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
@@ -21,35 +19,50 @@ import '../styles/tap.css';
 dayjs.extend(relativeTime);
 
 export default function Tap(props) {
-  const { horizontal, index, onEdit, onMove, onMoved, tap } = props;
+  const { index, onEdit, onMove, onMoved, tap } = props;
   const ref = useRef();
   const [empty, setEmpty] = useState(false);
   const [Icon, setIcon] = useState(SportsBarIcon);
+  const [rbr, setRbr] = useState('');
 
   useEffect(() => {
-    setEmpty(tap?.name?.trim().length === 0);
-  }, [tap]);
+    const newEmpty = tap?.name?.trim().length === 0;
+    let newIcon = HighlightOffIcon;
+    let newRbr = '';
 
-  useEffect(() => {
-    let newIcon;
-
-    switch (tap?.icon) {
-      case 'mug-full':
-        newIcon = SportsBarIcon;
-        break;
-      case 'mug-empty':
-        newIcon = SportsBarOutlinedIcon;
-        break;
-      case 'water':
-        newIcon = WaterDropIcon;
-        break;
-      default:
-        newIcon = empty ? SportsBarOutlinedIcon : SportsBarIcon;
-        break;
+    if (!newEmpty) {
+      switch (tap?.icon) {
+        case 'mug-full':
+        default:
+          newIcon = SportsBarIcon;
+          break;
+        case 'mug-empty':
+          newIcon = SportsBarOutlinedIcon;
+          break;
+        case 'water':
+          newIcon = WaterDropIcon;
+          break;
+      }
     }
 
+    if (tap.batch) {
+      if (tap.batch.rbr < 0.2) {
+        newRbr = 'Sweet';
+      } else if (tap.batch.rbr < 0.4) {
+        newRbr = 'Semi-sweet';
+      } else if (tap.batch.rbr < 0.6) {
+        newRbr = 'Balanced';
+      } else if (tap.batch.rbr < 0.8) {
+        newRbr = 'Semi-bitter';
+      } else if (tap.batch.rbr >= 0.8) {
+        newRbr = 'Bitter';
+      }
+    }
+
+    setEmpty(newEmpty);
     setIcon(newIcon);
-  }, [empty, tap]);
+    setRbr(newRbr);
+  }, [tap]);
 
   const [, dropRef] = useDrop(() => ({
     accept: 'tap',
@@ -95,53 +108,36 @@ export default function Tap(props) {
       className={
         classNames('tap-root',
           isDragging && 'tap-root-dragging',
-          empty && 'tap-root-empty',
-          horizontal && 'tap-horizontal')
+          empty && 'tap-root-empty')
       }
+      onDoubleClick={onEdit}
       ref={ref}
     >
-      <Card
-        className="tap-card"
-        elevation={2}
-        onDoubleClick={onEdit}
-      >
-        <CardContent className="tap-content">
-          <Typography variant="h2" textAlign="center">
-            {index + 1}
-          </Typography>
-          <div className="tap-icon">
-            <Icon className="tap-icon" style={{ color: tap.color }} />
-          </div>
-          <Typography className="tap-name" variant="h5">
-            {empty ? '(Empty)' : tap.name}
-          </Typography>
-          {tap.description &&
-            <Typography variant="body1" sx={{ flexShrink: 2 }}>
-              {tap.description}
-            </Typography>
-          }
-          <div className="grow" />
-          {tap.batch &&
-            <div className="tap-stats">
-              <Typography gutterBottom variant="body1" sx={{ whiteSpace: 'nowrap' }}>
-                {tap.batch.abv}
-                % ABV
-                {' • '}
-                {tap.batch.ibu}
-                {' '}
-                IBU
-                {' • '}
-                {tap.batch.rbr}
-                {' '}
-                RBR
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#558b2f' }}>
-                Brewed {dayjs(tap.batch.brewed).fromNow()}
-              </Typography>
-            </div>
-          }
-        </CardContent>
-      </Card>
+      <div className="tap-number">
+        {index + 1}
+      </div>
+      <div className="tap-content">
+        <h2 className="tap-name">
+          {empty ? "(Empty)" : tap.name}
+        </h2>
+        {!empty && tap.description?.length > 0 &&
+          <p className="tap-description">
+            {tap.description}
+          </p>
+        }
+      </div>
+      <div className="tap-stats">
+        {tap.batch &&
+          <span>
+            {tap.batch.abv}
+            % ABV
+            {rbr != '' && ' | ' + rbr}
+          </span>
+        }
+      </div>
+      <div className="tap-icon">
+        <Icon className="tap-icon" style={{ color: !empty && tap.color }} />
+      </div>
     </div>
   )
 }

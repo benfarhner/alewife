@@ -66,4 +66,4 @@ app.use(_.post('/api/settings', async (ctx) => {
   await jobs.start();
 })();
 
-app.listen(5001);
+app.listen(process.env.PORT);

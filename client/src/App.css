@@ -1,5 +1,22 @@
 html {
-  background-color: #5D9A65;
+  /* background: center center / cover no-repeat url(../public/images/spruce-forest.svg), var(--background-color); */
+  background: center center / cover no-repeat var(--background-color);
+}
+
+.app {
+  height: 100vh;
+  overflow: hidden;
+  width: 100vw;
+}
+
+.app-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+  grid-template-rows: 128px 1fr 34px;
+  height: 100vh;
+  overflow: hidden;
+  width: 100vw;
 }
 
 .logo {
@@ -8,23 +25,11 @@ html {
   align-items: center;
   justify-content: center;
 }
-
-.logo img {
-  height: 128px;
-  width: auto;
-}
-
-.MuiButtonBase-root.settings, .MuiButtonBase-root.add-tap {
-  background-color: transparent;
-  color: rgba(0, 0, 0, 0.2);
-  position: fixed;
-  bottom: 0px;
-}
-
-.settings {
-  left: 0px;
-}
-
-.add-tap {
-  right: 0px;
+.swatch {
+  width: 53px;
+  height: 53px;
+  border-radius: 4px;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }

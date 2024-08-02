@@ -1,5 +1,11 @@
 .tap-root {
+  align-items: center;
+  display: grid;
+  gap: 2vmin;
+  grid-template-columns: min-content auto min-content min-content;
+  grid-template-rows: 1fr;
   height: 100%;
+  justify-items: start;
 }
 
 .tap-root-empty .tap-card {
@@ -10,30 +16,40 @@
   opacity: 0;
 }
 
-.MuiCard-root.tap-card {
-  background-color: #FFF7E5 !important;
-  color: #453124;
-  display: flex;
-  flex-direction: row;
-  height: 100%;
+.tap-number {
+  font-family: 'OldStyle 1';
+  font-size: 7vmin;
 }
 
 .tap-content {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: 16px;
-  text-align: center;
+  gap: 0;
 }
 
-.tap-horizontal .tap-content {
-  flex-direction: row;
-  align-items: center;
-  padding: 24px !important;
-  text-align: left;
+.tap-name {
+  font-family: 'ADAM.CG PRO';
+  font-size: 3vmin;
+  font-weight: normal;
+  margin: 0;
 }
 
-.tap-horizontal .tap-name {
+.tap-root-empty .tap-name {
+  color: #999;
+}
+
+.tap-description {
+  font-family: 'OldStyle Small Caps';
+  font-size: 2vmin;
+  line-height: 1.5vmin;
+  margin: 0;
+  text-transform: lowercase;
+}
+
+.tap-stats {
+  font-family: 'OldStyle 1';
+  font-size: 2vmin;
   white-space: nowrap;
 }
 
@@ -41,14 +57,10 @@
   text-align: center;
 }
 
+.tap-root-empty .tap-icon {
+  color: #999;
+}
+
 .tap-icon .MuiSvgIcon-root {
-  font-size: 6rem;
-}
-
-.tap-horizontal .tap-stats {
-  text-align: right;
-}
-
-.grow {
-  flex-grow: 1;
+  font-size: 8vmin;
 }

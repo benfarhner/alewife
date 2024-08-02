@@ -4,7 +4,8 @@
 
 const { parentPort } = require('worker_threads');
 
-const { BatchService, BatchStatuses } = require('../services/batch.js');
+const { BatchService } = require('../services/batch.js');
+const { BatchStatuses } = require('../lib/batch-statuses.js');
 
 // Store boolean if the job is cancelled
 let cancelled = false;
