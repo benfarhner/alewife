@@ -4,7 +4,7 @@
   "description": "Alewife",
   "main": "server/index.js",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "@koa/cors": "^4.0.0",

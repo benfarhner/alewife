@@ -86,8 +86,7 @@ export default class Api {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Space-App-Key': process.env.REACT_APP_SPACE_API_KEY
+        'Accept': 'application/json'
       }
     })
       .then(response => response.json());
@@ -109,8 +108,7 @@ export default class Api {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Space-App-Key': process.env.REACT_APP_SPACE_API_KEY
+        'Accept': 'application/json'
       },
       body: JSON.stringify(payload)
     });
