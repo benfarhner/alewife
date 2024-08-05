@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'OldStyle 1';
-  src: url('/fonts/oldstyle.otf') format('opentype');
+  src: url('public/fonts/oldstyle.otf') format('opentype');
 }
 
 @font-face {
   font-family: 'OldStyle Small Caps';
-  src: url('/fonts/oldstylesmallcaps.otf') format('opentype');
+  src: url('public/fonts/oldstylesmallcaps.otf') format('opentype');
 }
 
 body {
