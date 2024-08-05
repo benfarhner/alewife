@@ -8,6 +8,11 @@
   src: url('../public/fonts/oldstylesmallcaps.otf') format('opentype');
 }
 
+@font-face {
+  font-family: 'ADAM.CG PRO';
+  src: url('../public/fonts/adamcgpro.otf') format('opentype');
+}
+
 body {
   height: 100vh;
   margin: 0;
