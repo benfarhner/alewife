@@ -33,16 +33,36 @@ export default function EditTap(props) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('');
+  const [flavorDescriptor, setFlavorDescriptor] = useState('');
   const [icon, setIcon] = useState('');
+  const [rbr, setRbr] = useState(0);
+  const [srm, setSrm] = useState(0);
 
   useEffect(() => {
-    setAbv(tap?.abv ?? tap?.batch?.abv ?? 0);
+    setAbv(tap?.abv ?? tap?.batch?.abv ?? 5);
     setBatchId(tap?.batch?.sourceId ?? '');
     setName(tap?.name ?? '');
     setDescription(tap?.description ?? '');
     setColor(tap?.color ?? 'var(--text-color)');
-    setIcon(tap?.icon ?? 'mug-empty')
+    setFlavorDescriptor(tap?.flavorDescriptor ?? '');
+    setIcon(tap?.icon ?? 'mug-full');
+    setRbr(tap?.rbr ?? tap?.batch?.rbr ?? 0.5);
+    setSrm(tap?.srm ?? tap?.batch?.srm ?? 10);
   }, [tap]);
+
+  const getFlavorDescriptor = useCallback(rbr => {
+    if (rbr < 0.2) {
+      return 'Sweet';
+    } else if (rbr < 0.4) {
+      return 'Semi-sweet';
+    } else if (rbr < 0.6) {
+      return 'Balanced';
+    } else if (rbr < 0.8) {
+      return 'Semi-bitter';
+    } else if (rbr >= 0.8) {
+      return 'Bitter';
+    }
+  }, []);
 
   const handleClose = useCallback(() => {
     const batch = batches.find(batch => batch.sourceId === batchId);
@@ -53,10 +73,14 @@ export default function EditTap(props) {
       abv,
       description,
       color,
-      icon
+      flavorDescriptor,
+      icon,
+      rbr,
+      srm
     };
     onClose(newTap);
-  }, [abv, batches, batchId, color, description, icon, name, onClose, tap]);
+  }, [abv, batches, batchId, color, description, flavorDescriptor, icon, name,
+    onClose, rbr, srm, tap]);
 
   const handleBatchChange = useCallback(event => {
     const batch = batches.find(batch => batch.sourceId === event.target.value);
@@ -65,14 +89,31 @@ export default function EditTap(props) {
     setName(batch?.name ?? '');
     setDescription(batch?.summary ?? '');
     setColor(getColorFromSrm(batch?.srm));
+    setFlavorDescriptor(getFlavorDescriptor(batch?.rbr ?? 0));
     setIcon(batch ? 'mug-full' : 'mug-empty');
+    setRbr(batch?.rbr ?? 0);
+    setSrm(batch?.srm ?? 10);
   }, [batches]);
 
-  const handleAbvChange = event => setAbv(event.target.value);
+  const handleAbvChange = event => setAbv(Number(event.target.value) ?? 0);
   const handleNameChange = event => setName(event.target.value);
   const handleDescriptionChange = event => setDescription(event.target.value);
   const handleColorChange = event => setColor(event?.target?.value ?? event);
+  const handleFlavorDescriptorChange = event =>
+    setFlavorDescriptor(event.target.value);
   const handleIconChange = (_, value) => value !== null && setIcon(value);
+  
+  const handleRbrChange = event => {
+    const newRbr = Number(event.target.value) ?? 0;
+    setRbr(newRbr);
+    setFlavorDescriptor(getFlavorDescriptor(newRbr));
+  }
+  
+  const handleSrmChange = event => {
+    const newSrm = Number(event.target.value) ?? 0;
+    setSrm(newSrm);
+    setColor(getColorFromSrm(newSrm));
+  }
 
   return (
     <Dialog
@@ -114,13 +155,6 @@ export default function EditTap(props) {
             value={name}
           />
           <TextField
-            id="edit-tap-abc"
-            label="ABV"
-            onChange={handleAbvChange}
-            type="number"
-            value={abv}
-          />
-          <TextField
             id="edit-tap-name"
             label="Tap description"
             minRows={3}
@@ -128,6 +162,55 @@ export default function EditTap(props) {
             onChange={handleDescriptionChange}
             value={description}
           />
+          <TextField
+            id="edit-tap-flavor-descriptor"
+            label="Flavor descriptor"
+            onChange={handleFlavorDescriptorChange}
+            value={flavorDescriptor}
+          />
+          <Stack justifyContent="stretch" direction="row" spacing={2}>
+            <TextField
+              id="edit-tap-abv"
+              inputProps={{
+                max: 20,
+                min: 0,
+                step: 0.1
+              }}
+              label="ABV"
+              onChange={handleAbvChange}
+              sx={{ flexGrow: 1 }}
+              type="number"
+              value={abv}
+            />
+            <TextField
+              helperText="0 = Sweet, 1 = Bitter"
+              id="edit-tap-rbr"
+              inputProps={{
+                max: 3,
+                min: 0,
+                step: 0.1
+              }}
+              label="RBR"
+              onChange={handleRbrChange}
+              sx={{ flexGrow: 1 }}
+              type="number"
+              value={rbr}
+            />
+            <TextField
+              helperText="0 = Light, 40 = Dark"
+              id="edit-tap-srm"
+              inputProps={{
+                max: 60,
+                min: 0,
+                step: 1
+              }}
+              label="SRM"
+              onChange={handleSrmChange}
+              sx={{ flexGrow: 1 }}
+              type="number"
+              value={srm}
+            />
+          </Stack>
           <Stack direction="row" spacing={2}>
             <FormControl>
               <FormLabel>

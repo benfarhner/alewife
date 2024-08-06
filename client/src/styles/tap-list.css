@@ -1,8 +1,10 @@
 .tap-coming-soon-heading {
   font-family: 'OldStyle Small Caps';
+  font-size: 3vmin;
   text-transform: lowercase;
 }
 
 .tap-coming-soon-batches {
   font-family: 'ADAM.CG PRO';
+  font-size: 3vmin;
 }

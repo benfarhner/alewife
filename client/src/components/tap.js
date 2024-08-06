@@ -23,12 +23,12 @@ export default function Tap(props) {
   const ref = useRef();
   const [empty, setEmpty] = useState(false);
   const [Icon, setIcon] = useState(SportsBarIcon);
-  const [rbr, setRbr] = useState('');
+  const [abv, setAbv] = useState(null);
 
   useEffect(() => {
+    let newAbv = null;
     const newEmpty = tap?.name?.trim().length === 0;
     let newIcon = HighlightOffIcon;
-    let newRbr = '';
 
     if (!newEmpty) {
       switch (tap?.icon) {
@@ -45,23 +45,15 @@ export default function Tap(props) {
       }
     }
 
-    if (tap.batch) {
-      if (tap.batch.rbr < 0.2) {
-        newRbr = 'Sweet';
-      } else if (tap.batch.rbr < 0.4) {
-        newRbr = 'Semi-sweet';
-      } else if (tap.batch.rbr < 0.6) {
-        newRbr = 'Balanced';
-      } else if (tap.batch.rbr < 0.8) {
-        newRbr = 'Semi-bitter';
-      } else if (tap.batch.rbr >= 0.8) {
-        newRbr = 'Bitter';
-      }
+    let abv = tap.abv ?? tap.batch?.abv;
+
+    if (abv != null && abv !== '' && abv > 0) {
+      newAbv = Number(abv).toFixed(1) + '% ABV';
     }
 
+    setAbv(newAbv);
     setEmpty(newEmpty);
     setIcon(newIcon);
-    setRbr(newRbr);
   }, [tap]);
 
   const [, dropRef] = useDrop(() => ({
@@ -127,11 +119,13 @@ export default function Tap(props) {
         }
       </div>
       <div className="tap-stats">
-        {tap.batch &&
+        {abv && <span>{abv}</span>}
+        {abv && tap.flavorDescriptor !== '' &&
+          <span> | </span>
+        }
+        {tap.flavorDescriptor && tap.flavorDescriptor !== '' &&
           <span>
-            {tap.batch.abv}
-            % ABV
-            {rbr != '' && ' | ' + rbr}
+            {tap.flavorDescriptor}
           </span>
         }
       </div>
