@@ -38,7 +38,7 @@ export default function TapList(props) {
     saveTaps_impl(newTaps);
   }, [saveTaps_impl]);
 
-  const loadData = useMemo(() => {
+  const loadData = useCallback(() => {
     const api = new Api();
 
     api.getBatches().then(newBatches => setBatches(newBatches));
