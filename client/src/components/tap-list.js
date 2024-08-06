@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Box, IconButton, Typography, requirePropFactory } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 
@@ -15,6 +15,8 @@ import Settings from './settings';
 import Tap from './tap';
 
 import '../styles/tap-list.css';
+
+const REFRESH_INTERVAL = 300000; // 5 minutes
 
 export default function TapList(props) {
   const { setSettings, settings } = props;
@@ -36,13 +38,20 @@ export default function TapList(props) {
     saveTaps_impl(newTaps);
   }, [saveTaps_impl]);
 
-  useEffect(() => {
+  const loadData = useMemo(() => {
     const api = new Api();
 
     api.getBatches().then(newBatches => setBatches(newBatches));
     api.getTaps().then(newTaps => setTaps(newTaps));
     api.getSettings().then(newSettings => setSettings(newSettings));
   }, []);
+
+  useEffect(() => {
+    loadData();
+
+    const interval = setInterval(loadData, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [loadData]);
 
   const handleAddTapClick = useCallback(() => {
     const newTap = { id: crypto.randomUUID() };
