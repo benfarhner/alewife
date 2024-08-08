@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import Api from '../lib/api';
+import ComingSoon from './coming-soon';
 import debounce from '../lib/debounce';
 import EditTap from './edit-tap';
 import Settings from './settings';
@@ -105,7 +106,7 @@ export default function TapList(props) {
     <>
       <Box sx={{
         display: 'grid',
-        gap: theme => theme.spacing(4),
+        gap: theme => theme.spacing(8),
         gridTemplateColumns: '1fr',
         gridTemplateRows: 'min-content 1fr min-content',
         height: '100%'
@@ -122,10 +123,10 @@ export default function TapList(props) {
         }}>
           <img alt="logo" src="/images/logo.png" />
         </Box>
-        <Box px={4} sx={{
+        <Box px={8} sx={{
           display: 'grid',
           columnGap: theme => theme.spacing(8),
-          rowGap: theme => theme.spacing(4),
+          rowGap: theme => theme.spacing(2),
           gridAutoFlow: 'column',
           gridAutoColumns: 'minmax(0, 1fr)',
           gridTemplateRows: 'repeat(auto-fit, minmax(100px, 1fr))'
@@ -145,7 +146,7 @@ export default function TapList(props) {
         <Box sx={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
+          alignItems: 'flex-end',
           justifyContent: 'space-between'
         }}>
           <IconButton
@@ -158,18 +159,7 @@ export default function TapList(props) {
           >
             <SettingsIcon />
           </IconButton>
-          <Box textAlign="center">
-            <span className="tap-coming-soon-heading">
-              Coming soon:{' '}
-            </span>
-            <span className="tap-coming-soon-batches">
-              {batches
-                .filter(i => i.status == "brewing" || i.status == "upcoming")
-                .map(i => i.name)
-                .join(', ')
-              }
-            </span>
-          </Box>
+          <ComingSoon batches={batches} />
           <IconButton
             onClick={handleAddTapClick}
             size="small"

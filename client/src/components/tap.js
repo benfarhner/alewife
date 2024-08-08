@@ -48,7 +48,7 @@ export default function Tap(props) {
     let abv = tap.abv ?? tap.batch?.abv;
 
     if (abv != null && abv !== '' && abv > 0) {
-      newAbv = Number(abv).toFixed(1) + '% ABV';
+      newAbv = Number(abv).toFixed(1) + '%';
     }
 
     setAbv(newAbv);
@@ -119,15 +119,15 @@ export default function Tap(props) {
         }
       </div>
       <div className="tap-stats">
-        {abv && <span>{abv}</span>}
-        {abv && tap.flavorDescriptor !== '' &&
-          <span> | </span>
-        }
         {tap.flavorDescriptor && tap.flavorDescriptor !== '' &&
           <span>
             {tap.flavorDescriptor}
           </span>
         }
+        {tap.flavorDescriptor !== '' && abv &&
+          <span> | </span>
+        }
+        {abv && <span>{abv}</span>}
       </div>
       <div className="tap-icon">
         <Icon className="tap-icon" style={{ color: !empty && tap.color }} />
