@@ -129,7 +129,7 @@ export default function TapList(props) {
           rowGap: theme => theme.spacing(2),
           gridAutoFlow: 'column',
           gridAutoColumns: 'minmax(0, 1fr)',
-          gridTemplateRows: 'repeat(auto-fit, minmax(100px, 1fr))'
+          gridTemplateRows: 'repeat(auto-fit, minmax(13vmin, 1fr))'
         }}>
           {taps?.map((tap, index) =>
             <div key={`tap-${tap.id}`}>
