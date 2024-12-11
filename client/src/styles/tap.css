@@ -2,7 +2,7 @@
   align-items: center;
   display: grid;
   gap: 3vmin;
-  grid-template-columns: min-content auto min-content min-content;
+  grid-template-columns: 4vmin auto min-content min-content;
   grid-template-rows: 1fr;
   height: 100%;
   justify-items: start;

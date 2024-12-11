@@ -125,11 +125,11 @@ export default function TapList(props) {
         </Box>
         <Box px={8} sx={{
           display: 'grid',
-          columnGap: theme => theme.spacing(8),
-          rowGap: theme => theme.spacing(2),
+          columnGap: '8vmin',
+          rowGap: '1vmin',
           gridAutoFlow: 'column',
           gridAutoColumns: 'minmax(0, 1fr)',
-          gridTemplateRows: 'repeat(auto-fit, minmax(13vmin, 1fr))'
+          gridTemplateRows: 'repeat(auto-fit, minmax(0, 1fr))'
         }}>
           {taps?.map((tap, index) =>
             <div key={`tap-${tap.id}`}>
