@@ -18,7 +18,7 @@
 
 .tap-number {
   font-family: 'OldStyle 1';
-  font-size: 8vmin;
+  font-size: 6vmin;
 }
 
 .tap-content {
@@ -30,7 +30,7 @@
 
 .tap-name {
   font-family: 'ADAM.CG PRO';
-  font-size: 4vmin;
+  font-size: 3vmin;
   font-weight: normal;
   margin: 0;
 }
@@ -41,7 +41,7 @@
 
 .tap-description {
   font-family: 'OldStyle Small Caps';
-  font-size: 3vmin;
+  font-size: 2.5vmin;
   line-height: 2vmin;
   margin: 0;
   padding-bottom: 1vmin;
@@ -50,7 +50,7 @@
 
 .tap-stats {
   font-family: 'OldStyle 1';
-  font-size: 2.5vmin;
+  font-size: 2vmin;
   white-space: nowrap;
 }
 
@@ -63,5 +63,5 @@
 }
 
 .tap-icon .MuiSvgIcon-root {
-  font-size: 8vmin;
+  font-size: 6vmin;
 }
