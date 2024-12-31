@@ -17,7 +17,7 @@ import Tap from './tap';
 
 import '../styles/tap-list.css';
 
-const REFRESH_INTERVAL = 300000; // 5 minutes
+const REFRESH_INTERVAL = 900000; // 15 minutes
 
 export default function TapList(props) {
   const { setSettings, settings } = props;
