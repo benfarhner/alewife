@@ -10,7 +10,8 @@ export default function ComingSoon(props) {
       </span>
       <span className="tap-coming-soon-batches">
         {batches
-          .filter(i => i.status == "brewing" || i.status == "upcoming")
+          .filter(i => i.status == "brewing")
+          .sort((a, b) => a.number - b.number)
           .map(i => i.name)
           .join(', ')
         }
